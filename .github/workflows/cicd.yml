@@ -1,0 +1,43 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Install dependencies
+      - name: Install dependencies
+        run: make install
+
+      # Test the flask application
+      - name: Test Email Generator
+        run: make test
+
+      # Format the code
+      - name: Format the code
+        run: make format
+
+      # Lint the code
+      - name: Lint the code
+        run: make lint
+
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # Build the Docker image
+      - name: Build Docker image
+        run: docker build --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} -t ${{ secrets.DOCKER_USERNAME }}/email-generator-app:latest .
+
+      # Push the Docker image to Docker Hub
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/email-generator-app:latest

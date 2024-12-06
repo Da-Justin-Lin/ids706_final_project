@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Draft Generator</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <h2>Menu</h2>
+        <ul>
+          <li><a href="/">Generate Email</a></li>
+          <li><a href="/history">Previous Emails</a></li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="container">
+          <h1>Email Draft Generator</h1>
+          <form method="POST">
+            <label for="purpose">Email Purpose:</label>
+            <input type="text" id="purpose" name="purpose" required />
+
+            <label for="tone">Email Tone:</label>
+            <select id="tone" name="tone" required>
+              <option value="formal">Formal</option>
+              <option value="casual">Casual</option>
+              <option value="persuasive">Persuasive</option>
+            </select>
+
+            <label for="details">Additional Details:</label>
+            <textarea id="details" name="details" rows="5"></textarea>
+
+            <button type="submit">Generate Email</button>
+          </form>
+
+          {% if email_draft %}
+          <h2>Your Email Draft:</h2>
+          <div class="email-draft">
+            <pre>{{ email_draft }}</pre>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

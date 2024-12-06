@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email History</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <h2>Menu</h2>
+        <ul>
+          <li><a href="/">Generate Email</a></li>
+          <li><a href="/history">Previous Emails</a></li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="container">
+          <h1>Previous Emails</h1>
+          <ul class="email-history">
+            {% for email in email_history %}
+            <li>
+              <div class="email-item">
+                <h3>Purpose: {{ email.purpose }}</h3>
+                <p><strong>Tone:</strong> {{ email.tone }}</p>
+                <p>{{ email.details }}</p>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
