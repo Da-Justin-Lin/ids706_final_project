@@ -142,14 +142,16 @@ button:hover {
   margin-bottom: 15px;
 }
 
-.email-item {
+.email-draft {
   background: #f4f4f4;
   padding: 15px;
   border-radius: 5px;
-  font-family: Arial, sans-serif;
+  font-family: monospace;
   white-space: pre-wrap; /* Preserve line breaks */
-  word-wrap: break-word; /* Handle long words */
-  box-sizing: border-box; /* Include padding in total width */
-  overflow: hidden; /* Prevent content from spilling */
-  margin-bottom: 15px;
+  word-wrap: break-word; /* Prevent long words from breaking the layout */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: hidden; /* Disable vertical scrolling */
+  max-width: 100%; /* Keep the container within its parent width */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  width: 100%; /* Make the container span the parent width */
 }

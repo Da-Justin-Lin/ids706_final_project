@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email History</title>
-    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/styleHistory.css" />
   </head>
   <body>
     <div class="wrapper">
@@ -27,7 +27,7 @@
               <div class="email-item">
                 <h3>Purpose: {{ email.purpose }}</h3>
                 <p><strong>Tone:</strong> {{ email.tone }}</p>
-                <p>{{ email.details }}</p>
+                <p>{{ email.draft }}</p>
               </div>
             </li>
             {% endfor %}

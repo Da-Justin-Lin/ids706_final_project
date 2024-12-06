@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import openai
 from dotenv import load_dotenv
+import requests
 import os
 
 app = Flask(__name__)
@@ -8,6 +9,8 @@ app = Flask(__name__)
 # Configure OpenAI API Key
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+API_GATEWAY_URL = "https://zr86zuw8ie.execute-api.us-east-1.amazonaws.com/default/generateEmail"
+GET_EMAILS_API_URL = "https://rzruww4oeb.execute-api.us-east-1.amazonaws.com/default/queryEmail"
 
 # Sample email history
 email_history = [
@@ -101,11 +104,40 @@ def index():
             email_draft = response["choices"][0]["message"]["content"].strip()
         except Exception as e:
             email_draft = f"Error generating email: {e}"
+        
+        try: 
+            api_response = requests.post(
+                    API_GATEWAY_URL,
+                    json={
+                        "purpose": purpose,
+                        "tone": tone,
+                        "details": additional_details,
+                        "draft": email_draft,
+                    },
+                )
+            print(api_response.json())  # Log the response from API Gateway
+        except Exception as e:
+            email_draft = f"Error generating email: {e}"
+            print(f"Error: {e}")
 
     return render_template("index.html", email_draft=email_draft)
 
 @app.route("/history", methods=["GET"])
 def history():
+    try:
+        # Query all emails from the Lambda function via API Gateway
+        api_response = requests.get(GET_EMAILS_API_URL)
+        if api_response.status_code == 200:
+            email_history = api_response.json().get("emails", [])
+        else:
+            email_history = []
+            print(f"Failed to fetch emails: {api_response.json()}")
+        print(email_history)
+    except Exception as e:
+        email_history = []
+        print(f"Error fetching email history: {e}")
+
+    # Render the history template with the retrieved email data
     return render_template("history.html", email_history=email_history)
 
 if __name__ == "__main__":
