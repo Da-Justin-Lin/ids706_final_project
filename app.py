@@ -107,7 +107,7 @@ def index():
         
         if not email_draft.startswith("Error generating email:"):
             try: 
-                api_response = requests.post(
+                _ = requests.post(
                         API_GATEWAY_URL,
                         json={
                             "purpose": purpose,
