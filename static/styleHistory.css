@@ -26,6 +26,7 @@
     position: sticky; /* Makes the sidebar stay in place */
     top: 0;
     height: 100vh; /* Full height for the sidebar */
+    font-family: Arial, sans-serif;
   }
   
   .sidebar h2 {

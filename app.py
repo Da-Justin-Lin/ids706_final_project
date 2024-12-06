@@ -105,20 +105,21 @@ def index():
         except Exception as e:
             email_draft = f"Error generating email: {e}"
         
-        try: 
-            api_response = requests.post(
-                    API_GATEWAY_URL,
-                    json={
-                        "purpose": purpose,
-                        "tone": tone,
-                        "details": additional_details,
-                        "draft": email_draft,
-                    },
-                )
-            print(api_response.json())  # Log the response from API Gateway
-        except Exception as e:
-            email_draft = f"Error generating email: {e}"
-            print(f"Error: {e}")
+        if not email_draft.startswith("Error generating email:"):
+            try: 
+                api_response = requests.post(
+                        API_GATEWAY_URL,
+                        json={
+                            "purpose": purpose,
+                            "tone": tone,
+                            "details": additional_details,
+                            "draft": email_draft,
+                        },
+                    )
+                #print(api_response.json())  # Log the response from API Gateway
+            except Exception as e:
+                email_draft = f"Error generating email: {e}"
+                print(f"Error: {e}")
 
     return render_template("index.html", email_draft=email_draft)
 
