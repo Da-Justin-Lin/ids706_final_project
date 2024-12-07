@@ -119,7 +119,7 @@ Performance metrics collected during the load test show the system is stable and
 
 ## **Architectural Diagram**
 
-![Architecture Diagram](screenshots/arch.png)
+![Architecture Diagram](screenshots/arch.jpg)
 
 ---
 
