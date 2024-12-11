@@ -6,7 +6,7 @@
 
 ## **Project Overview**
 
-This project demonstrates a robust, scalable Flask-based microservice that integrates with a data pipeline and utilizes AWS for storage infrastructure. It features logging, containerization using a Distroless Docker image and load testing solution. 
+This project demonstrates a robust, scalable Flask-based microservice that integrates with a data pipeline and utilizes AWS for storage infrastructure. It features logging, containerization using a Docker image and load testing solution. 
 
 The application is designed to process user input, generate professional emails via an embedded LLM API (OpenAI's GPT-3.5-turbo), and store the results in a DynamoDB table using an AWS Lambda function.
 
@@ -24,7 +24,7 @@ The application is designed to process user input, generate professional emails 
 - Lambda function handles database interactions, decoupling storage from the main service.
 
 ### **Containerization**:
-- Dockerized application using a **Distroless Docker image** for enhanced security and performance.
+- Dockerized application using a **Docker image** for enhanced security and performance.
 - Pushes the container to both **DockerHub** and **AWS Elastic Container Registry (ECR)** for hosting.
 
 ### **Performance and Load Testing**:
@@ -109,7 +109,7 @@ Performance metrics collected during the load test show the system is stable and
 ## **Technologies Used**
 
 - **Programming Language**: Python (Flask)
-- **Containerization**: Docker (Distroless image)
+- **Containerization**: Docker
 - **Cloud Platform**: AWS (DynamoDB, Lambda, ECR)
 - **LLM API**: OpenAI GPT-3.5-turbo
 - **CI/CD**: GitHub Actions
@@ -143,4 +143,4 @@ Performance metrics collected during the load test show the system is stable and
 
 ## **Demo Video**
 
-Check out our [YouTube walkthrough](https://www.youtube.com/watch?v=<video-id>) showcasing the app, its features, and performance benchmarks.
+Check out our [YouTube walkthrough](https://youtu.be/M0WSAXq1dKc) showcasing the app, its features, and performance benchmarks.
