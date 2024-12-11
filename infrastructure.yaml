@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Infrastructure with two Lambda functions, API Gateway, and DynamoDB table.
+
+Parameters:
+  GenerateEmailFunctionName:
+    Type: String
+    Default: GenerateEmailFunction
+    Description: Name of the generateEmail Lambda function.
+
+  QueryEmailFunctionName:
+    Type: String
+    Default: QueryEmailFunction
+    Description: Name of the queryEmail Lambda function.
+
+Resources:
+  # IAM Role for Lambda Functions
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !GetAtt EmailsTable.Arn
+
+  # DynamoDB Table
+  EmailsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: EmailsTable
+      AttributeDefinitions:
+        - AttributeName: EmailId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: EmailId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # Lambda Function: GenerateEmail
+  GenerateEmailFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref GenerateEmailFunctionName
+      Handler: generate_email.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.9
+      Code:
+        S3Bucket: my-code-bucket # Replace with your S3 bucket name
+        S3Key: lambda/generate_email.zip # Replace with your Lambda code path
+      Environment:
+        Variables:
+          TABLE_NAME: EmailsTable
+
+  # Lambda Function: QueryEmail
+  QueryEmailFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref QueryEmailFunctionName
+      Handler: query_email.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.9
+      Code:
+        S3Bucket: my-code-bucket # Replace with your S3 bucket name
+        S3Key: lambda/query_email.zip # Replace with your Lambda code path
+      Environment:
+        Variables:
+          TABLE_NAME: EmailsTable
+
+  # API Gateway
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: EmailServiceAPI
+
+  # API Resource: /generate
+  ApiGenerateResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: generate
+
+  ApiGenerateMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGenerateResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GenerateEmailFunction.Arn}/invocations
+
+  # API Resource: /query
+  ApiQueryResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: query
+
+  ApiQueryMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiQueryResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${QueryEmailFunction.Arn}/invocations
+
+Outputs:
+  GenerateApiEndpoint:
+    Description: API Endpoint for GenerateEmail Lambda
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/generate
+
+  QueryApiEndpoint:
+    Description: API Endpoint for QueryEmail Lambda
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/query

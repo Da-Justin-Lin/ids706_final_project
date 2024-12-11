@@ -26,5 +26,5 @@ EXPOSE 5001
 ARG OPENAI_API_KEY
 ENV OPENAI_API_KEY=$OPENAI_API_KEY
 
-# Command to run the application
-CMD ["app.py"]
+# Command to run the application (explicitly use Python)
+CMD ["python3", "app.py"]
