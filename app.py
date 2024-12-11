@@ -12,63 +12,13 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 API_GATEWAY_URL = "https://zr86zuw8ie.execute-api.us-east-1.amazonaws.com/default/generateEmail"
 GET_EMAILS_API_URL = "https://rzruww4oeb.execute-api.us-east-1.amazonaws.com/default/queryEmail"
 
-# Sample email history
-email_history = [
-    {
-        "purpose": "Follow-up on job application",
-        "tone": "Formal",
-        "details": "I interviewed last week for the Product Manager role and wanted to follow up on the status of my application.",
-        "draft": """Subject: Follow-Up on Product Manager Job Application
-
-Dear [Hiring Manager's Name],
-
-I hope this email finds you well. I wanted to follow up on my application for the Product Manager position and inquire about any updates regarding the status of my candidacy. I greatly enjoyed our conversation during the interview on [date] and am very enthusiastic about the opportunity to contribute to [Company Name].
-
-Please let me know if there is any additional information I can provide to assist in your decision-making process. I look forward to hearing from you soon.
-
-Best regards,
-[Your Full Name]
-"""
-    },
-    {
-        "purpose": "Request for meeting reschedule",
-        "tone": "Casual",
-        "details": "I need to reschedule our team sync meeting planned for Monday due to a conflict with another engagement.",
-        "draft": """Subject: Request to Reschedule Monday's Meeting
-
-Hi Team,
-
-I hope you're all doing well! I wanted to reach out to let you know that I have a scheduling conflict with our team sync on Monday. Would it be possible to move it to Tuesday or another time that works for everyone?
-
-Let me know your availability, and I’ll do my best to accommodate. Thanks for your understanding!
-
-Best,
-[Your Name]
-"""
-    },
-    {
-        "purpose": "Introduce a new product to a client",
-        "tone": "Persuasive",
-        "details": "We have launched a new AI-powered tool that streamlines customer support, and I believe it could greatly benefit their operations.",
-        "draft": """Subject: Enhance Your Customer Support with Our New AI Tool
-
-Dear [Client's Name],
-
-I’m excited to share with you our latest innovation: an AI-powered tool designed to streamline customer support processes and elevate your service efficiency. This tool has already helped organizations like [Example Company] reduce response times by 30% and improve customer satisfaction.
-
-I’d love to schedule a quick call to discuss how this tool could be customized to meet your specific needs. Are you available for a 15-minute chat this week? Let me know a time that works for you.
-
-Looking forward to your response.
-
-Best regards,
-[Your Name]
-"""
-    }
-]
+# Items per page for pagination
+ITEMS_PER_PAGE = 5
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    """Route to generate an email based on user input."""
     email_draft = None
     if request.method == "POST":
         purpose = request.form.get("purpose")
@@ -87,7 +37,7 @@ def index():
         try:
             # Use OpenAI's chat model
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # Switch to the supported model
+                model="gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
@@ -95,7 +45,7 @@ def index():
                     },
                     {
                         "role": "user",
-                        "content": f"Generate an email for the following: Purpose: {purpose}, Tone: {tone}, Additional Details: {additional_details}",
+                        "content": prompt,
                     },
                 ],
                 max_tokens=200,
@@ -104,42 +54,59 @@ def index():
             email_draft = response["choices"][0]["message"]["content"].strip()
         except Exception as e:
             email_draft = f"Error generating email: {e}"
-        
+
         if not email_draft.startswith("Error generating email:"):
-            try: 
+            try:
+                # Store email draft in the backend
                 _ = requests.post(
-                        API_GATEWAY_URL,
-                        json={
-                            "purpose": purpose,
-                            "tone": tone,
-                            "details": additional_details,
-                            "draft": email_draft,
-                        },
-                    )
-                #print(api_response.json())  # Log the response from API Gateway
+                    API_GATEWAY_URL,
+                    json={
+                        "purpose": purpose,
+                        "tone": tone,
+                        "details": additional_details,
+                        "draft": email_draft,
+                    },
+                )
             except Exception as e:
-                email_draft = f"Error generating email: {e}"
+                email_draft = f"Error saving email: {e}"
                 print(f"Error: {e}")
 
     return render_template("index.html", email_draft=email_draft)
 
+
 @app.route("/history", methods=["GET"])
 def history():
+    """Route to display email history with pagination."""
     try:
-        # Query all emails from the Lambda function via API Gateway
+        # Query all emails from the API Gateway
         api_response = requests.get(GET_EMAILS_API_URL)
         if api_response.status_code == 200:
             email_history = api_response.json().get("emails", [])
         else:
             email_history = []
             print(f"Failed to fetch emails: {api_response.json()}")
-        print(email_history)
     except Exception as e:
         email_history = []
         print(f"Error fetching email history: {e}")
 
-    # Render the history template with the retrieved email data
-    return render_template("history.html", email_history=email_history)
+    # Handle pagination
+    page = int(request.args.get("page", 1))
+    start = (page - 1) * ITEMS_PER_PAGE
+    end = start + ITEMS_PER_PAGE
+    paginated_emails = email_history[start:end]
+
+    # Determine pagination controls
+    has_next = end < len(email_history)
+    has_prev = start > 0
+
+    return render_template(
+        "history.html",
+        email_history=paginated_emails,
+        page=page,
+        has_next=has_next,
+        has_prev=has_prev,
+    )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

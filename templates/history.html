@@ -32,6 +32,17 @@
             </li>
             {% endfor %}
           </ul>
+
+          <!-- Pagination Controls -->
+          <div class="pagination">
+            {% if has_prev %}
+            <a href="/history?page={{ page - 1 }}" class="pagination-btn prev">⟵ Previous</a>
+            {% endif %}
+            <span class="pagination-info">Page {{ page }}</span>
+            {% if has_next %}
+            <a href="/history?page={{ page + 1 }}" class="pagination-btn next">Next ⟶</a>
+            {% endif %}
+          </div>          
         </div>
       </div>
     </div>
