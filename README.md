@@ -143,4 +143,4 @@ Performance metrics collected during the load test show the system is stable and
 
 ## **Demo Video**
 
-Check out our [YouTube walkthrough](https://www.youtube.com/watch?v=<video-id>) showcasing the app, its features, and performance benchmarks.
+Check out our [YouTube walkthrough](https://youtu.be/M0WSAXq1dKc) showcasing the app, its features, and performance benchmarks.
