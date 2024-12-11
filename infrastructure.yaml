@@ -66,9 +66,6 @@ Resources:
       Handler: generate_email.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.9
-      Code:
-        S3Bucket: my-code-bucket # Replace with your S3 bucket name
-        S3Key: lambda/generate_email.zip # Replace with your Lambda code path
       Environment:
         Variables:
           TABLE_NAME: EmailsTable
@@ -81,9 +78,6 @@ Resources:
       Handler: query_email.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.9
-      Code:
-        S3Bucket: my-code-bucket # Replace with your S3 bucket name
-        S3Key: lambda/query_email.zip # Replace with your Lambda code path
       Environment:
         Variables:
           TABLE_NAME: EmailsTable
