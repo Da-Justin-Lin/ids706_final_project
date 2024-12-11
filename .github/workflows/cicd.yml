@@ -58,8 +58,9 @@ jobs:
       # Build and Push Docker image to AWS ECR
       - name: Build and Push to AWS ECR
         run: |
-          docker buildx build --platform linux/amd64 -t 905418314331.dkr.ecr.us-east-1.amazonaws.com/email-generator:latest .
-          docker push 905418314331.dkr.ecr.us-east-1.amazonaws.com/email-generator:latest
+          docker buildx build --platform linux/amd64 \
+          --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+          -t 905418314331.dkr.ecr.us-east-1.amazonaws.com/email-generator:latest --push .
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
